@@ -1,6 +1,16 @@
 from datetime import datetime
 from stroll import app, db, login_manager #used to be from stroll
 from flask_login import UserMixin
+from sqlalchemy.inspection import inspect
+
+class Serializer(object):
+
+    def serialize(self):
+        return {c: getattr(self, c) for c in inspect(self).attrs.keys()}
+
+    @staticmethod
+    def serialize_list(l):
+        return [m.serialize() for m in l]
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -21,7 +31,7 @@ class User(db.Model, UserMixin):
         return f"User('{self.username}', '{self.email}')"
 
     
-class Journey(db.Model):
+class Journey(db.Model, Serializer):
     id = db.Column(db.Integer, primary_key=True)
     date_posted = db.Column(db.DateTime, nullable=False,
                             default=datetime.utcnow)
@@ -35,7 +45,14 @@ class Journey(db.Model):
     polyline = db.Column(db.String)
 
     def __repr__(self):
-        return f"Journey('{self.name}', '{self.date_posted}', '{self.is_private}')"
+        return f"Journey('{self.polyline}', '{self.date_posted}', '{self.is_private}')"
+
+    def serialize(self):
+        d = Serializer.serialize(self)
+        del d['date_posted']
+        return d    
+
+    
 
 
 class Attractions(db.Model):

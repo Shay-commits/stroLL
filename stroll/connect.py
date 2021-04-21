@@ -1,7 +1,7 @@
 import sqlite3
 import json
 
-DB = '/stroll/stroll/site.db'
+DB = 'stroll/site.db'
 
 
 def get_all_users_json(json_str=True):
@@ -150,20 +150,27 @@ def get_attractions(water, green_space, traffic, buildings, json_str=True):
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     cur.execute("""
-        SELECT attr_coordinates FROM attractions WHERE water = ? OR green_spaces = ? OR traffic = ? OR buildings = ?
+        SELECT attr_coordinates, attractionName FROM attractions WHERE water = ? OR green_spaces = ? OR traffic = ? OR buildings = ?
         """, (water, green_space, traffic, buildings))
     coordinates = cur.fetchall()
+    #print(str(coordinates))
     if json_str == True:
         coordinates = json.dumps([list(ix) for ix in coordinates])  # CREATE JSON
 
     coordinates = json.loads(str(coordinates))
+    #print(str(coordinates))
+    
 
     for count, coord_pair in enumerate(coordinates):
         innerString = coord_pair[0] #'3453598.5,5348953489.5'
         #print(innerString, 'BEFORE')
+
+        example = coord_pair[1]
+        #print(str(example))
         innerString = innerString.split(",") #['3453598.5', '5348953489.5']
         #print(innerString, 'AFTER')
-        coord_pair = [float(innerString[0]), float(innerString[1])]
+        coord_pair = [float(innerString[0]), float(innerString[1]), example]
+        #print(str(coord_pair))
         #print(coord_pair, 'AFTER AFTER')
         coordinates[count] = coord_pair
 
@@ -175,6 +182,7 @@ def get_attractions(water, green_space, traffic, buildings, json_str=True):
         #coord_pair = coord_pair.split(",")
         #print(coord_pair)
         #coord_pair = list(map(float, coord_pair))
+   # print(str(coordinates))
     return coordinates
 
     # got in column : 123.456,123.456

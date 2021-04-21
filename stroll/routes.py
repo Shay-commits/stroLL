@@ -3,6 +3,7 @@ import secrets
 import sqlite3
 import json
 from flask import render_template, url_for, flash, redirect, request, jsonify, abort
+from flask_cors import CORS
 from stroll import app, db, bcrypt
 from stroll.models import User, Journey
 from flask_login import login_user, current_user, logout_user, login_required
@@ -20,7 +21,7 @@ from stroll.journeys import RadialJourney, SimpleJourney, getPolyline
 #! If have time: /users/username/attractions + /users/username/attractions/?attraction_id=stuff, otherwise just put in our own attractions
 # https://techtutorialsx.com/2017/01/07/flask-parsing-json-data/
 
-
+CORS(app)
 @app.route("/", methods=['GET'])
 def home():
     print("Person accessed website")
@@ -127,6 +128,7 @@ def journeys(user_id):
 
             #print(attractionsList, 'egreeeeeeeeeeeeeeeeeeeeeeeghuegurhguehgiuehgieushgsui')
             journey.makeVisitAttractions(attractionsList)
+            print(str(journey.makeVisitAttractions(attractionsList)))
             gmapsOutput = journey.getGmapsDirections()
 
         waypoints = journey.waypoints
@@ -143,7 +145,14 @@ def journeys(user_id):
         )
         db.session.add(newJourney)
         db.session.commit()
-        return content
+
+        temp = newJourney.serialize()
+        print(temp)
+        temp["attractions"] = attractionsList
+        print(temp)
+        
+        #return json.dumps(newJourney.serialize()) + 'This is the attraction list: ' + str(attractionsList)
+        return json.dumps(temp)
 
 
 @app.route("/users/<user_id>/journeys/<journey_id>", methods=['PUT'])
