@@ -30,6 +30,7 @@ def home():
 
 @app.route('/check_login_status')
 def check_login_status():
+    print(current_user)
     return str(current_user.is_authenticated)
 
 
@@ -52,7 +53,9 @@ def users():
                     )
         db.session.add(user)
         db.session.commit()
-        return content
+        userCredentials = user.serialize()
+        
+        return userCredentials
 
 
 @app.route("/login", methods=['POST'])
@@ -61,8 +64,12 @@ def login():
     user = User.query.filter_by(username=content['username']).first()
     if not user or not bcrypt.check_password_hash(user.password, content['password']):
         return abort(403)
+
+    print(user)
+    print(login_user(user))   
     login_user(user)
-    return redirect('/')
+    userCredentials = user.serialize()
+    return userCredentials
 
 
 @app.route("/logout", methods=['POST'])

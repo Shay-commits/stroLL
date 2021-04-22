@@ -28,7 +28,12 @@ class User(db.Model, UserMixin):
     pace = db.Column(db.Integer)
 
     def __repr__(self):
-        return f"User('{self.username}', '{self.email}')"
+        return f"User('{self.username}','{self.email}')"
+
+    def serialize(self):
+        d = Serializer.serialize(self)
+        del d['password']
+        return d        
 
     
 class Journey(db.Model, Serializer):
